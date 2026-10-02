@@ -1,9 +1,6 @@
-FROM golang:1.24-alpine AS builder
+FROM golang:1.26-alpine AS builder
 
-RUN apk add --no-cache git curl
-
-RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.linux-amd64.tar.gz | tar xvz && \
-    mv migrate /usr/local/bin/migrate
+RUN apk add --no-cache git
 
 WORKDIR /app
 
@@ -17,7 +14,6 @@ FROM alpine:3.19
 
 RUN apk add --no-cache ca-certificates
 
-COPY --from=builder /usr/local/bin/migrate /usr/local/bin/migrate
 COPY --from=builder /app/build/alutec-inventory-be /app/alutec-inventory-be
 COPY --from=builder /app/migrations /app/migrations
 COPY --from=builder /app/entrypoint.sh /app/entrypoint.sh
