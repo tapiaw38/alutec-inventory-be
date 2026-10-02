@@ -15,7 +15,9 @@ type ListFilterOptions struct {
 }
 
 type Repository interface {
-	Create(context.Context, domain.Product) (string, error)
+	// Create takes the warehouse that receives the opening stock; it is
+	// ignored when the product starts at zero.
+	Create(ctx context.Context, p domain.Product, openingWarehouseID string) (string, error)
 	Get(context.Context, string) (*domain.Product, error)
 	List(context.Context, ListFilterOptions) ([]domain.Product, error)
 	Update(context.Context, string, domain.Product) error

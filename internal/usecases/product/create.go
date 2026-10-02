@@ -31,7 +31,9 @@ type (
 		SalePrice  float64 `json:"sale_price"`
 		MinStock   int     `json:"min_stock"`
 		StockQty   int     `json:"stock_qty"`
-		ImageURL   string  `json:"image_url"`
+		// WarehouseID receives the opening stock; required only when StockQty > 0.
+		WarehouseID string `json:"warehouse_id"`
+		ImageURL    string `json:"image_url"`
 	}
 
 	CreateOutput struct {
@@ -46,6 +48,10 @@ func NewCreateUsecase(contextFactory appcontext.Factory) CreateUsecase {
 func (u *createUsecase) Execute(ctx context.Context, in CreateInput) (*CreateOutput, apperrors.ApplicationError) {
 	app := u.contextFactory()
 
+	if in.StockQty > 0 && in.WarehouseID == "" {
+		return nil, apperrors.NewBadRequestError("elegí un depósito para el stock inicial")
+	}
+
 	id, err := app.Repositories.Product.Create(ctx, domain.Product{
 		SKU:        in.SKU,
 		Name:       in.Name,
@@ -57,13 +63,13 @@ func (u *createUsecase) Execute(ctx context.Context, in CreateInput) (*CreateOut
 		MinStock:   in.MinStock,
 		StockQty:   in.StockQty,
 		ImageURL:   in.ImageURL,
-	})
+	}, in.WarehouseID)
 	if err != nil {
 		if pgerr.IsUniqueViolation(err, skuUniqueConstraint) {
 			return nil, apperrors.NewConflictError("ya existe un producto con ese SKU")
 		}
 		if pgerr.IsForeignKeyViolation(err) {
-			return nil, apperrors.NewBadRequestError("categoría o proveedor inválido")
+			return nil, apperrors.NewBadRequestError("categoría, proveedor o depósito inválido")
 		}
 		return nil, apperrors.NewApplicationError(mappings.ProductCreateError, err)
 	}

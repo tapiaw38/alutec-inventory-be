@@ -54,6 +54,7 @@ var importHeaderKey = map[string]string{
 	"preciodeventa": "sale_price",
 	"stockminimo":   "min_stock",
 	"stockactual":   "stock_qty",
+	"deposito":      "warehouse",
 }
 
 func (u *importUsecase) Execute(ctx context.Context, fileBytes []byte, filename string) (*ImportOutput, apperrors.ApplicationError) {
@@ -83,6 +84,10 @@ func (u *importUsecase) Execute(ctx context.Context, fileBytes []byte, filename 
 	if err != nil {
 		return nil, apperrors.NewInternalError(err)
 	}
+	warehouses, err := app.Repositories.Warehouse.List(ctx)
+	if err != nil {
+		return nil, apperrors.NewInternalError(err)
+	}
 
 	categoryIDByName := make(map[string]string, len(categories))
 	for _, c := range categories {
@@ -91,6 +96,10 @@ func (u *importUsecase) Execute(ctx context.Context, fileBytes []byte, filename 
 	supplierIDByName := make(map[string]string, len(suppliers))
 	for _, s := range suppliers {
 		supplierIDByName[normalizeText(s.Name)] = s.ID
+	}
+	warehouseIDByName := make(map[string]string, len(warehouses))
+	for _, w := range warehouses {
+		warehouseIDByName[normalizeText(w.Name)] = w.ID
 	}
 
 	output := &ImportOutput{}
@@ -133,6 +142,19 @@ func (u *importUsecase) Execute(ctx context.Context, fileBytes []byte, filename 
 			unit = "pieza"
 		}
 
+		stockQty := parseInt(entry["stock_qty"])
+		warehouseID := ""
+		if stockQty > 0 {
+			warehouseID, ok = warehouseIDByName[normalizeText(entry["warehouse"])]
+			if !ok {
+				output.Errors = append(output.Errors, ImportRowError{
+					Row:     rowNumber,
+					Message: fmt.Sprintf("Depósito no encontrado para el stock inicial: %q", entry["warehouse"]),
+				})
+				continue
+			}
+		}
+
 		_, appErr := u.createUsecase.Execute(ctx, CreateInput{
 			SKU:        entry["sku"],
 			Name:       entry["name"],
@@ -141,8 +163,9 @@ func (u *importUsecase) Execute(ctx context.Context, fileBytes []byte, filename 
 			Unit:       unit,
 			CostPrice:  parseFloat(entry["cost_price"]),
 			SalePrice:  parseFloat(entry["sale_price"]),
-			MinStock:   parseInt(entry["min_stock"]),
-			StockQty:   parseInt(entry["stock_qty"]),
+			MinStock:    parseInt(entry["min_stock"]),
+			StockQty:    stockQty,
+			WarehouseID: warehouseID,
 		})
 		if appErr != nil {
 			output.Errors = append(output.Errors, ImportRowError{Row: rowNumber, Message: appErr.Message()})

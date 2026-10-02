@@ -20,7 +20,7 @@ type (
 
 	CreateInput struct {
 		Name string `json:"name" binding:"required"`
-		Type string `json:"type" binding:"required,oneof=raw_material finished_good"`
+		Type string `json:"type" binding:"required,oneof=raw_material finished_good tool"`
 	}
 
 	CreateOutput struct {

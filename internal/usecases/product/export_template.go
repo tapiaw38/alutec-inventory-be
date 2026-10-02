@@ -22,7 +22,7 @@ func NewExportTemplateUsecase() ExportTemplateUsecase {
 
 var importTemplateHeaders = []string{
 	"SKU", "Nombre", "Categoria", "Proveedor", "Unidad",
-	"Precio Costo", "Precio Venta", "Stock Minimo", "Stock Actual",
+	"Precio Costo", "Precio Venta", "Stock Minimo", "Stock Actual", "Deposito",
 }
 
 func (u *exportTemplateUsecase) Execute(_ context.Context) ([]byte, apperrors.ApplicationError) {
@@ -41,7 +41,7 @@ func (u *exportTemplateUsecase) Execute(_ context.Context) ([]byte, apperrors.Ap
 
 	sample := []any{
 		"PIN-2X4-3M", "Tabla de Pino 2x4 3m", "Maderas", "Maderera del Sur",
-		"pieza", 4500, 6800, 20, 85,
+		"pieza", 4500, 6800, 20, 85, "Depósito Central",
 	}
 	for i, value := range sample {
 		cell, _ := excelize.CoordinatesToCellName(i+1, 2)
