@@ -25,6 +25,11 @@ type Repository interface {
 	// Archive soft-deletes: the row stays so stock movements keep resolving.
 	Archive(ctx context.Context, id string) error
 	AdjustStock(ctx context.Context, id string, delta int) error
+	// Reference counts decide whether a catalog entry can be removed.
+	CountActiveByCategory(ctx context.Context, categoryID string) (int, error)
+	CountActiveBySupplier(ctx context.Context, supplierID string) (int, error)
+	ExistsByCategory(ctx context.Context, categoryID string) (bool, error)
+	ExistsBySupplier(ctx context.Context, supplierID string) (bool, error)
 }
 
 type repository struct {

@@ -13,6 +13,8 @@ type Repository interface {
 	List(context.Context) ([]domain.Category, error)
 	Update(context.Context, string, domain.Category) error
 	Delete(context.Context, string) error
+	// Archive soft-deletes: the row stays so existing references resolve.
+	Archive(ctx context.Context, id string) error
 }
 
 type repository struct {

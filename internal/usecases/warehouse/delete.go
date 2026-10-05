@@ -9,12 +9,19 @@ import (
 )
 
 type (
+	// DeleteUsecase removes a warehouse, or archives it once the stock ledger
+	// references it. Unlike products, a warehouse is never blocked: the ledger
+	// is history, not something the user can clear out first.
 	DeleteUsecase interface {
-		Execute(ctx context.Context, id string) apperrors.ApplicationError
+		Execute(ctx context.Context, id string) (*DeleteOutput, apperrors.ApplicationError)
 	}
 
 	deleteUsecase struct {
 		contextFactory appcontext.Factory
+	}
+
+	DeleteOutput struct {
+		Archived bool `json:"archived"`
 	}
 )
 
@@ -22,20 +29,30 @@ func NewDeleteUsecase(contextFactory appcontext.Factory) DeleteUsecase {
 	return &deleteUsecase{contextFactory: contextFactory}
 }
 
-func (u *deleteUsecase) Execute(ctx context.Context, id string) apperrors.ApplicationError {
+func (u *deleteUsecase) Execute(ctx context.Context, id string) (*DeleteOutput, apperrors.ApplicationError) {
 	app := u.contextFactory()
 
 	current, err := app.Repositories.Warehouse.Get(ctx, id)
 	if err != nil {
-		return apperrors.NewApplicationError(mappings.WarehouseGetError, err)
+		return nil, apperrors.NewApplicationError(mappings.WarehouseGetError, err)
 	}
 	if current == nil {
-		return apperrors.NewApplicationError(mappings.WarehouseNotFoundError, nil)
+		return nil, apperrors.NewApplicationError(mappings.WarehouseNotFoundError, nil)
+	}
+
+	referenced, err := app.Repositories.StockMovement.ExistsForWarehouse(ctx, id)
+	if err != nil {
+		return nil, apperrors.NewApplicationError(mappings.WarehouseDeleteError, err)
+	}
+	if referenced {
+		if err := app.Repositories.Warehouse.Archive(ctx, id); err != nil {
+			return nil, apperrors.NewApplicationError(mappings.WarehouseDeleteError, err)
+		}
+		return &DeleteOutput{Archived: true}, nil
 	}
 
 	if err := app.Repositories.Warehouse.Delete(ctx, id); err != nil {
-		return apperrors.NewApplicationError(mappings.WarehouseDeleteError, err)
+		return nil, apperrors.NewApplicationError(mappings.WarehouseDeleteError, err)
 	}
-
-	return nil
+	return &DeleteOutput{Archived: false}, nil
 }

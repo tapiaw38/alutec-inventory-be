@@ -9,11 +9,17 @@ import (
 
 func NewDeleteHandler(uc ucCategory.DeleteUsecase) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if appErr := uc.Execute(c, c.Param("id")); appErr != nil {
+		out, appErr := uc.Execute(c, c.Param("id"))
+		if appErr != nil {
 			appErr.Log(c)
 			c.JSON(appErr.StatusCode(), appErr)
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "category deleted"})
+
+		message := "category deleted"
+		if out.Archived {
+			message = "category archived"
+		}
+		c.JSON(http.StatusOK, gin.H{"message": message, "data": out})
 	}
 }

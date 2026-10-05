@@ -10,6 +10,7 @@ func (r *repository) List(ctx context.Context) ([]domain.Warehouse, error) {
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, name, COALESCE(location, ''), created_at
 		FROM warehouses
+		WHERE archived_at IS NULL
 		ORDER BY name ASC
 	`)
 	if err != nil {

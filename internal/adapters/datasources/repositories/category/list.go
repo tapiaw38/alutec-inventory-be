@@ -10,6 +10,7 @@ func (r *repository) List(ctx context.Context) ([]domain.Category, error) {
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, name, type, created_at
 		FROM categories
+		WHERE archived_at IS NULL
 		ORDER BY name ASC
 	`)
 	if err != nil {
