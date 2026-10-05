@@ -9,11 +9,17 @@ import (
 
 func NewDeleteHandler(uc ucProduct.DeleteUsecase) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if appErr := uc.Execute(c, c.Param("id")); appErr != nil {
+		out, appErr := uc.Execute(c, c.Param("id"))
+		if appErr != nil {
 			appErr.Log(c)
 			c.JSON(appErr.StatusCode(), appErr)
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "product deleted"})
+
+		message := "product deleted"
+		if out.Archived {
+			message = "product archived"
+		}
+		c.JSON(http.StatusOK, gin.H{"message": message, "data": out})
 	}
 }

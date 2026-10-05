@@ -11,7 +11,7 @@ func (r *repository) List(ctx context.Context, filter ListFilterOptions) ([]doma
 	query := `
 		SELECT id, sku, name, category_id, supplier_id, unit, cost_price, sale_price, min_stock, stock_qty, COALESCE(image_url, ''), created_at
 		FROM products
-		WHERE 1 = 1
+		WHERE archived_at IS NULL
 	`
 	args := []any{}
 

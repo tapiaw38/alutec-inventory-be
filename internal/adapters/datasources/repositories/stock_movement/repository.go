@@ -25,6 +25,7 @@ type Repository interface {
 	Create(context.Context, domain.StockMovement) (string, error)
 	Get(context.Context, string) (*domain.StockMovement, error)
 	List(context.Context, ListFilterOptions) ([]domain.StockMovement, error)
+	ExistsForProduct(ctx context.Context, productID string) (bool, error)
 }
 
 type repository struct {

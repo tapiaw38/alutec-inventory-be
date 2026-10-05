@@ -22,6 +22,8 @@ type Repository interface {
 	List(context.Context, ListFilterOptions) ([]domain.Product, error)
 	Update(context.Context, string, domain.Product) error
 	Delete(context.Context, string) error
+	// Archive soft-deletes: the row stays so stock movements keep resolving.
+	Archive(ctx context.Context, id string) error
 	AdjustStock(ctx context.Context, id string, delta int) error
 }
 
