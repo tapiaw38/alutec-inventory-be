@@ -2,12 +2,17 @@ package usecases
 
 import (
 	"github.com/tapiaw38/alutec-inventory-be/internal/platform/appcontext"
+	ucAuth "github.com/tapiaw38/alutec-inventory-be/internal/usecases/auth"
 	ucCategory "github.com/tapiaw38/alutec-inventory-be/internal/usecases/category"
 	ucProduct "github.com/tapiaw38/alutec-inventory-be/internal/usecases/product"
 	ucStockMovement "github.com/tapiaw38/alutec-inventory-be/internal/usecases/stock_movement"
 	ucSupplier "github.com/tapiaw38/alutec-inventory-be/internal/usecases/supplier"
 	ucWarehouse "github.com/tapiaw38/alutec-inventory-be/internal/usecases/warehouse"
 )
+
+type AuthUsecases struct {
+	Login ucAuth.LoginUsecase
+}
 
 type CategoryUsecases struct {
 	Create ucCategory.CreateUsecase
@@ -49,6 +54,7 @@ type StockMovementUsecases struct {
 }
 
 type Usecases struct {
+	Auth          AuthUsecases
 	Category      CategoryUsecases
 	Supplier      SupplierUsecases
 	Warehouse     WarehouseUsecases
@@ -58,6 +64,9 @@ type Usecases struct {
 
 func NewUsecases(contextFactory appcontext.Factory) *Usecases {
 	return &Usecases{
+		Auth: AuthUsecases{
+			Login: ucAuth.NewLoginUsecase(),
+		},
 		Category: CategoryUsecases{
 			Create: ucCategory.NewCreateUsecase(contextFactory),
 			Get:    ucCategory.NewGetUsecase(contextFactory),

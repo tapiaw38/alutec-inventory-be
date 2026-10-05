@@ -97,6 +97,14 @@ func NewConflictError(msg string) ApplicationError {
 	}, nil)
 }
 
+func NewUnauthorizedError(msg string) ApplicationError {
+	return NewApplicationError(mappings.ErrorDetails{
+		InternalCode: "common:unauthorized",
+		StatusCode:   401,
+		Message:      msg,
+	}, nil)
+}
+
 func NewNotFoundError(msg string) ApplicationError {
 	return NewApplicationError(mappings.ErrorDetails{
 		InternalCode: "common:not-found",

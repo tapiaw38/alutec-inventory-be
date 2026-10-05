@@ -2,16 +2,21 @@ package web
 
 import (
 	"github.com/gin-gonic/gin"
+	handlerAuth "github.com/tapiaw38/alutec-inventory-be/internal/adapters/web/handlers/auth"
 	handlerCategory "github.com/tapiaw38/alutec-inventory-be/internal/adapters/web/handlers/category"
 	handlerProduct "github.com/tapiaw38/alutec-inventory-be/internal/adapters/web/handlers/product"
 	handlerStockMovement "github.com/tapiaw38/alutec-inventory-be/internal/adapters/web/handlers/stock_movement"
 	handlerSupplier "github.com/tapiaw38/alutec-inventory-be/internal/adapters/web/handlers/supplier"
 	handlerWarehouse "github.com/tapiaw38/alutec-inventory-be/internal/adapters/web/handlers/warehouse"
+	"github.com/tapiaw38/alutec-inventory-be/internal/adapters/web/middleware"
 	"github.com/tapiaw38/alutec-inventory-be/internal/usecases"
 )
 
 func RegisterRoutes(app *gin.Engine, uc *usecases.Usecases) {
-	api := app.Group("/api")
+	// Logging in is the only route reachable without a session.
+	app.POST("/api/auth/login", handlerAuth.NewLoginHandler(uc.Auth.Login))
+
+	api := app.Group("/api", middleware.RequireAuth())
 
 	api.POST("/categories", handlerCategory.NewCreateHandler(uc.Category.Create))
 	api.GET("/categories", handlerCategory.NewListHandler(uc.Category.List))

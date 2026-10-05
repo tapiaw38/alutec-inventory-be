@@ -1,6 +1,9 @@
 package config
 
-import "os"
+import (
+	"os"
+	"time"
+)
 
 var configService *Config
 
@@ -14,6 +17,12 @@ func InitConfigService() {
 		},
 		DatabaseConfig: DatabaseConfig{
 			DatabaseURL: getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:54324/alutec-inventory-db?sslmode=disable"),
+		},
+		AuthConfig: AuthConfig{
+			Email:    getEnv("AUTH_EMAIL", ""),
+			Password: getEnv("AUTH_PASSWORD", ""),
+			Secret:   getEnv("AUTH_SECRET", ""),
+			TokenTTL: 12 * time.Hour,
 		},
 	}
 }
