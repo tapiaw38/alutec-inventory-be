@@ -156,13 +156,13 @@ func (u *importUsecase) Execute(ctx context.Context, fileBytes []byte, filename 
 		}
 
 		_, appErr := u.createUsecase.Execute(ctx, CreateInput{
-			SKU:        entry["sku"],
-			Name:       entry["name"],
-			CategoryID: categoryID,
-			SupplierID: supplierID,
-			Unit:       unit,
-			CostPrice:  parseFloat(entry["cost_price"]),
-			SalePrice:  parseFloat(entry["sale_price"]),
+			SKU:         entry["sku"],
+			Name:        entry["name"],
+			CategoryID:  categoryID,
+			SupplierID:  supplierID,
+			Unit:        unit,
+			CostPrice:   parseFloat(entry["cost_price"]),
+			SalePrice:   parseFloat(entry["sale_price"]),
 			MinStock:    parseInt(entry["min_stock"]),
 			StockQty:    stockQty,
 			WarehouseID: warehouseID,
